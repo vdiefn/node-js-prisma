@@ -26,5 +26,20 @@
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "supertest": "^7.0.0"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexschool/node-js-final-2026.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hexschool/node-js-final-2026/issues"
+  },
+  "homepage": "https://github.com/hexschool/node-js-final-2026#readme"
 }
