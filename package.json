@@ -41,5 +41,10 @@
   "bugs": {
     "url": "https://github.com/hexschool/node-js-final-2026/issues"
   },
-  "homepage": "https://github.com/hexschool/node-js-final-2026#readme"
+  "homepage": "https://github.com/hexschool/node-js-final-2026#readme",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "pg": "^8.23.0"
+  }
 }

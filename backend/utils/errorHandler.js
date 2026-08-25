@@ -1,6 +1,8 @@
-export default errorHandler = (code, message) => {
+const errorHandler = (code, message) => {
   const error = new Error(message)
   error.statusCode = code
   error.isOperational = true
   return error
 }
+
+export default errorHandler

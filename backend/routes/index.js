@@ -1,10 +1,12 @@
 import express from "express"
+import skillRouter from "./skill.js"
+import healthCheckRouter from "./healthCheck.js"
 
 const router = express.Router()
 
-router.get("/healthcheck", (req, res, next) => {
-  res.status(200).send("OK")
-})
+router.use("/healthCheck", healthCheckRouter)
+router.use("/api/coaches/skill", skillRouter)
+
 
 
 export default router
