@@ -5,3 +5,13 @@ coverage/
 *.log
 dist/
 jest-result.json
+/generated/prisma
+
+# AI Editors & Agents
+.agents/
+.claude/
+.windsurf/
+.cursor/
+.codeium/
+skills-lock.json
+

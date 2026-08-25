@@ -6,7 +6,6 @@ const PORT = process.env.PORT
 
 async function start() {
   try {
-
     app.listen(PORT, () => {
       console.log(`server 跑起來了: http://localhost:${PORT}`)
     })
