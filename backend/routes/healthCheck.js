@@ -1,9 +1,9 @@
-import express from "express"
+import express from "express";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/healthcheck", (req, res, next) => {
-  res.status(200).send("OK")
-})
+router.get("/", (req, res, next) => {
+  res.status(200).send("OK");
+});
 
-export default router
+export default router;
