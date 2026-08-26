@@ -16,7 +16,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   if(err.isOperational){
-    return res.status(err.statusCode).json({status:"false", message:err.message})
+    return res.status(err.statusCode).json({status:"failed", message:err.message})
   }
 
   res.status(500).json({name: err.name, message:err.message})
