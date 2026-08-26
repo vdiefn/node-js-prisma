@@ -27,7 +27,7 @@ export const createCoachSkill = async (req, res, next) => {
     select: {
       id: true,
       name: true,
-      created_at: true,
+      createdAt: true,
     },
   });
 
