@@ -8,3 +8,9 @@ export const isValidString = (str) => {
 export const isValidInteger = (num) => {
   return typeof num === "number" && Number.isInteger(num) && num > 0;
 };
+
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[\d])[a-zA-Z\d]{8,16}$/;
+export const isValidPassword = (str) => {
+  if (!isValidString(str)) return false;
+  return PASSWORD_REGEX.test(str);
+};
