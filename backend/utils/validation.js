@@ -1,5 +1,5 @@
 export const isValidString = (str) => {
-  if (!str || str.trim().length === 0) {
+  if (!str || typeof str !== "string" || str.trim().length === 0) {
     return false;
   }
   return true;
