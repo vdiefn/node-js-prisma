@@ -16,15 +16,17 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+  coach Coach?
 }
 
 model Skill {
   id         String   @id @default(uuid())
   name       String   @unique @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAat DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("skills")
+  coachSkill CoachSkill[]
 }
 
 model CreditPackage {
@@ -36,4 +38,32 @@ model CreditPackage {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("credit_packages")
+}
+
+model Coach {
+  id String @id @default(uuid())
+  userId String @unique @map("user_id")
+  experience_years Int
+  description String @db.VarChar(255)
+  profile_image_url String? @db.VarChar(2048)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  @@map("coaches")
+  user User @relation(fields:[userId], references:[id], onDelete: Cascade)
+  coachSkill CoachSkill[]
+}
+
+model CoachSkill {
+  id String @id @default(uuid())
+  coachId String @map("coach_id")
+  skillId String @map("skill_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  @@map("coach_skills")
+  @@unique([coachId, skillId])
+
+  coach Coach @relation(fields:[coachId], references:[id], onDelete: Cascade)
+  skill Skill @relation(fields:[skillId], references:[id], onDelete:Cascade)
 }
