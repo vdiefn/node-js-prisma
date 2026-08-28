@@ -33,10 +33,10 @@ export const createCoach = async (req, res, next) => {
 
   const coachData = await prisma.coach.create({
     data: {
-      user_id: userId,
-      experience_years,
+      userId,
+      experienceYears: experience_years,
       description,
-      profile_image_url,
+      profileImageUrl: profile_image_url,
     },
   });
   res.status(201).json({
@@ -47,11 +47,36 @@ export const createCoach = async (req, res, next) => {
       },
       coach: {
         id: coachData.id,
-        user_id: coachData.user_id,
-        experience_years: coachData.experience_years,
+        user_id: coachData.userId,
+        experience_years: coachData.experienceYears,
         description: coachData.description,
-        profile_image_url: coachData.profile_image_url,
+        profile_image_url: coachData.profileImageUrl,
+        created_at: coachData.createdAt,
+        updated_at: coachData.updatedAt,
       },
     },
   });
+};
+
+export const getAdminCoach = async (req, res, next) => {
+  const { id: userId } = req.user;
+
+  const coachData = await prisma.coach.findUnique({
+    where: {
+      userId,
+    },
+    include: {
+      user: true,
+      coachSkill: {
+        include: {
+          skill: true,
+        },
+      },
+    },
+  });
+  if (!coachData || coachData.user.role === "USER") {
+    return next(errorHandler(401, "使用者尚未成為教練"));
+  }
+
+  res.status(200).json({ status: "success", data: coachData });
 };
