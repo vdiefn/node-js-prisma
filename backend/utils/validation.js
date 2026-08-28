@@ -14,3 +14,9 @@ export const isValidPassword = (str) => {
   if (!isValidString(str)) return false;
   return PASSWORD_REGEX.test(str);
 };
+
+export const isValidURL = (str) => {
+  if (!isValidString(str)) return false;
+
+  return str.startsWith("https://");
+};
