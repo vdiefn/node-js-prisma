@@ -43,9 +43,9 @@ model CreditPackage {
 model Coach {
   id String @id @default(uuid())
   userId String @unique @map("user_id")
-  experience_years Int
+  experienceYears Int @map("experience_years")
   description String @db.VarChar(255)
-  profile_image_url String? @db.VarChar(2048)
+  profileImageUrl String? @db.VarChar(2048) @map("profile_image_url")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
