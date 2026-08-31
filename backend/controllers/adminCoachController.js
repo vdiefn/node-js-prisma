@@ -1,11 +1,16 @@
+import { prisma } from "../lib/prisma.js";
 import errorHandler from "../utils/errorHandler.js";
 import { isValidString, isValidInteger, isValidURL } from "../utils/validation.js";
 
 export const createCoach = async (req, res, next) => {
-  const { user_id: userId } = req.params;
+  const { userId } = req.params;
   const { experience_years, description, profile_image_url } = req.body;
 
-  if (!isValidString(description) || !isValidInteger(experience_years) || !isValidURL(profile_image_url)) {
+  if (profile_image_url && !isValidURL(profile_image_url)) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+
+  if (!isValidString(description) || !isValidInteger(experience_years)) {
     return next(errorHandler(400, "欄位未填寫正確"));
   }
 
@@ -40,6 +45,7 @@ export const createCoach = async (req, res, next) => {
     },
   });
   res.status(201).json({
+    status: "success",
     data: {
       user: {
         name: updateUserData.name,
@@ -65,11 +71,19 @@ export const getAdminCoach = async (req, res, next) => {
     where: {
       userId,
     },
-    include: {
-      user: true,
+    select: {
+      id: true,
+      experienceYears: true,
+      description: true,
+      profileImageUrl: true,
+      user: {
+        select: {
+          role: true,
+        },
+      },
       coachSkill: {
-        include: {
-          skill: true,
+        select: {
+          skillId: true,
         },
       },
     },
@@ -78,5 +92,13 @@ export const getAdminCoach = async (req, res, next) => {
     return next(errorHandler(401, "使用者尚未成為教練"));
   }
 
-  res.status(200).json({ status: "success", data: coachData });
+  const data = {
+    id: coachData.id,
+    experience_years: coachData.experienceYears,
+    description: coachData.description,
+    profile_image_url: coachData.profileImageUrl,
+    skill_ids: coachData.coachSkill.map((i) => i.skillId),
+  };
+
+  res.status(200).json({ status: "success", data });
 };

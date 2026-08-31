@@ -3,7 +3,7 @@ import { createCoach, getAdminCoach } from "../controllers/adminCoachController.
 import { verifyToken } from "../middlewares/verifyToken.js";
 const router = Router();
 
-router.post("/:user_id", createCoach);
+router.post("/:userId", createCoach);
 router.get("/", verifyToken, getAdminCoach);
 
 export default router;
