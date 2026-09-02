@@ -27,12 +27,13 @@ model Skill {
 
   @@map("skills")
   coachSkill CoachSkill[]
+  course Course[]
 }
 
 model CreditPackage {
   id String @id @default(uuid())
   name String @unique @db.VarChar(50)
-  credit_amount Int
+  creditAmount Int @map("credit_amount")
   price Int
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -52,6 +53,7 @@ model Coach {
   @@map("coaches")
   user User @relation(fields:[userId], references:[id], onDelete: Cascade)
   coachSkill CoachSkill[]
+  course Course[]
 }
 
 model CoachSkill {
@@ -66,4 +68,25 @@ model CoachSkill {
 
   coach Coach @relation(fields:[coachId], references:[id], onDelete: Cascade)
   skill Skill @relation(fields:[skillId], references:[id], onDelete:Cascade)
+}
+
+model Course {
+  id String @id @default(uuid())
+  coachId String @map("coach_id")
+  skillId String @map("skill_id")
+  name String @db.VarChar(30)
+  status String @default("尚未開始")
+  description String @db.VarChar(255)
+  endAt DateTime @map("end_at")
+  startAt DateTime @map("start_at")
+  maxParticipants Int @default(15) @map("max_participants")
+  meetingUrl String @db.VarChar(255)
+  participants Int @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("courses")
+
+  coach Coach @relation(fields:[coachId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields:[skillId], references:[id], onDelete: Restrict)
 }
