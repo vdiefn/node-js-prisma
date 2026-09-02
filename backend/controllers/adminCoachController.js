@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import errorHandler from "../utils/errorHandler.js";
-import { isValidString, isValidInteger, isValidURL } from "../utils/validation.js";
+import validator from "validator";
+import { isValidString, isValidInteger, isValidURL, isValidArray } from "../utils/validation.js";
 
 export const createCoach = async (req, res, next) => {
   const { userId } = req.params;
@@ -88,9 +89,6 @@ export const getAdminCoach = async (req, res, next) => {
       },
     },
   });
-  if (!coachData || coachData.user.role === "USER") {
-    return next(errorHandler(401, "使用者尚未成為教練"));
-  }
 
   const data = {
     id: coachData.id,
@@ -101,4 +99,56 @@ export const getAdminCoach = async (req, res, next) => {
   };
 
   res.status(200).json({ status: "success", data });
+};
+
+export const updateAdminCoach = async (req, res, next) => {
+  const { id: userId } = req.user;
+  const { experience_years, description, profile_image_url, skill_ids } = req.body;
+
+  if (
+    !isValidInteger(experience_years) ||
+    !isValidString(description) ||
+    !isValidURL(profile_image_url) ||
+    !isValidArray(skill_ids) ||
+    !skill_ids.every((i) => validator.isUUID(i))
+  ) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+
+  const [coachData] = await prisma.$transaction([
+    prisma.coach.update({
+      where: { userId },
+      data: {
+        experienceYears: experience_years,
+        description,
+        profileImageUrl: profile_image_url,
+      },
+    }),
+    prisma.coachSkill.deleteMany({
+      where: {
+        coach: {
+          userId,
+        },
+      },
+    }),
+  ]);
+
+  await prisma.coachSkill.createMany({
+    data: skill_ids.map((i) => {
+      return {
+        coachId: coachData.id,
+        skillId: i,
+      };
+    }),
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      experience_years: coachData.experienceYears,
+      description,
+      profile_image_url: coachData.profileImageUrl,
+      skill_ids,
+    },
+  });
 };
