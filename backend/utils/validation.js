@@ -20,3 +20,7 @@ export const isValidURL = (str) => {
 
   return str.startsWith("https://");
 };
+
+export const isValidArray = (arr) => {
+  return Array.isArray(arr) && arr.length > 0;
+};
