@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import errorHandler from "../utils/errorHandler.js";
+import { getCourseStatus } from "../utils/getCourseStatus.js";
 import validator from "validator";
 import { isValidString, isValidInteger, isValidURL, isValidArray } from "../utils/validation.js";
 
@@ -151,4 +152,71 @@ export const updateAdminCoach = async (req, res, next) => {
       skill_ids,
     },
   });
+};
+
+export const getCoachCourse = async (req, res, next) => {
+  const userId = req.user.id;
+  const courses = await prisma.course.findMany({
+    where: {
+      coach: { userId },
+    },
+  });
+
+  const courseData = courses.map((item) => {
+    return {
+      ...item,
+      status: getCourseStatus(item.startAt, item.endAt),
+    };
+  });
+
+  res.status(200).json({ status: "success", data: courseData });
+};
+
+export const createCoachCourse = async (req, res, next) => {
+  const userId = req.user.id;
+  const {
+    skill_id: skillId,
+    name,
+    description,
+    start_at: startAt,
+    end_at: endAt,
+    max_participants: maxParticipants,
+    meeting_url: meetingUrl,
+  } = req.body;
+
+  if (
+    !validator.isUUID(skillId) ||
+    !isValidString(name) ||
+    !isValidString(description) ||
+    !validator.isISO8601(startAt) ||
+    !validator.isISO8601(endAt) ||
+    !isValidInteger(maxParticipants) ||
+    !isValidURL(meetingUrl)
+  ) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+
+  const courseData = await prisma.course.create({
+    data: {
+      coach: { connect: { userId } },
+      skill: { connect: { id: skillId } },
+      name,
+      description,
+      startAt: startAt,
+      endAt: endAt,
+      maxParticipants: maxParticipants,
+      meetingUrl: meetingUrl,
+    },
+  });
+
+  res.status(201).json({
+    status: "success",
+    data: {
+      course: courseData,
+    },
+  });
+};
+
+export const getCourseDetail = async (req, res, next) => {
+  
 };
