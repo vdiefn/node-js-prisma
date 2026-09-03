@@ -254,3 +254,76 @@ export const getCourseDetail = async (req, res, next) => {
     },
   });
 };
+
+export const updateCourseDetail = async (req, res, next) => {
+  const { courseId } = req.params;
+  const { id: userId } = req.user;
+  const {
+    skill_id: skillId,
+    name,
+    description,
+    start_at: startAt,
+    end_at: endAt,
+    max_participants: maxParticipants,
+    meeting_url: meetingUrl,
+  } = req.body;
+
+  if (!validator.isUUID(courseId)) {
+    return next(errorHandler(400, "課程不存在"));
+  }
+
+  if (
+    !validator.isUUID(skillId) ||
+    !isValidString(name) ||
+    !isValidString(description) ||
+    !validator.isISO8601(startAt) ||
+    !validator.isISO8601(endAt) ||
+    !isValidInteger(maxParticipants) ||
+    !isValidURL(meetingUrl)
+  ) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+  
+  const targetCourse = await prisma.course.findFirst({
+    where: {
+      id: courseId,
+      coach: { userId },
+    },
+  });
+  if (!targetCourse) {
+    return next(errorHandler(400, "課程不存在"));
+  }
+
+  const newData = await prisma.course.update({
+    where: {
+      id: courseId,
+    },
+    data: {
+      skillId,
+      name,
+      description,
+      endAt,
+      startAt,
+      maxParticipants,
+      meetingUrl,
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    data: {
+      course: {
+        id: newData.id,
+        user_id: userId,
+        skill_Id: newData.skillId,
+        name: newData.name,
+        description: newData.description,
+        start_at: newData.startAt,
+        end_at: newData.endAt,
+        max_participants: newData.maxParticipants,
+        meeting_url: newData.meetingUrl,
+        created_at: newData.createdAt,
+        updated_at: newData.updatedAt,
+      },
+    },
+  });
+};
