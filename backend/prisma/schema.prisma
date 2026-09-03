@@ -75,7 +75,6 @@ model Course {
   coachId String @map("coach_id")
   skillId String @map("skill_id")
   name String @db.VarChar(30)
-  status String @default("尚未開始")
   description String @db.VarChar(255)
   endAt DateTime @map("end_at")
   startAt DateTime @map("start_at")
