@@ -218,5 +218,39 @@ export const createCoachCourse = async (req, res, next) => {
 };
 
 export const getCourseDetail = async (req, res, next) => {
-  
+  const { courseId } = req.params;
+  const { id: userId } = req.user;
+
+  if (!validator.isUUID(courseId)) {
+    return next(errorHandler(400, "課程不存在"));
+  }
+
+  const target = await prisma.course.findFirst({
+    where: {
+      id: courseId,
+      coach: { userId },
+    },
+    include: {
+      skill: true,
+    },
+  });
+
+  if (!target) {
+    return next(errorHandler(400, "課程不存在"));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      id: target.id,
+      name: target.name,
+      description: target.description,
+      start_at: target.startAt,
+      end_at: target.endAt,
+      max_participants: target.maxParticipants,
+      skill_name: target.skill.name,
+      skill_id: target.skillId,
+      meeting_url: target.meetingUrl,
+    },
+  });
 };
