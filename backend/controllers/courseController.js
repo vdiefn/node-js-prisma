@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import errorHandler from "../utils/errorHandler.js";
+import validator from "validator";
 
 export const getAllCourses = async (req, res, next) => {
   const today = new Date();
@@ -51,5 +52,63 @@ export const getAllCourses = async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data,
+  });
+};
+
+export const bookingCourse = async (req, res, next) => {
+  const { courseId } = req.params;
+  const { id: userId } = req.user;
+
+  if (!validator.isUUID(courseId)) {
+    return next(errorHandler(400, "ID錯誤"));
+  }
+
+  const targetCourse = await prisma.course.findUnique({ where: { id: courseId } });
+  if (!targetCourse) {
+    return next(errorHandler(400, "ID錯誤"));
+  }
+
+  const hasBooked = await prisma.courseBooking.findFirst({
+    where: {
+      userId,
+      courseId,
+    },
+  });
+  if (hasBooked) {
+    return next(errorHandler(400, "已經報名過此課程"));
+  }
+
+  const creditPurchaseData = await prisma.creditPurchase.findMany({ where: { userId } });
+  const totalCreditCount = creditPurchaseData.reduce((acc, cur) => (acc = acc + cur.purchasedCredit), 0);
+  const creditUsageCount = await prisma.courseBooking.count({
+    where: {
+      userId,
+      cancelledAt: null,
+    },
+  });
+  if (totalCreditCount - creditUsageCount <= 0) {
+    return next(errorHandler(400, "已無可使用堂數"));
+  }
+
+  const totalParticipantsCount = await prisma.courseBooking.count({
+    where: {
+      courseId,
+      cancelledAt: null,
+    },
+  });
+  if (targetCourse.maxParticipants - totalParticipantsCount <= 0) {
+    return next(errorHandler(400, "已達最大參加人數，無法參加"));
+  }
+
+  await prisma.courseBooking.create({
+    data: {
+      userId,
+      courseId,
+    },
+  });
+
+  res.status(201).json({
+    status: "success",
+    data: null,
   });
 };
