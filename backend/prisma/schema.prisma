@@ -17,6 +17,7 @@ model User {
 
   @@map("users")
   coach Coach?
+  creditPurchase CreditPurchase[]
 }
 
 model Skill {
@@ -39,6 +40,7 @@ model CreditPackage {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("credit_packages")
+  creditPurchase CreditPurchase[]
 }
 
 model Coach {
@@ -88,4 +90,20 @@ model Course {
 
   coach Coach @relation(fields:[coachId], references: [id], onDelete: Cascade)
   skill Skill @relation(fields:[skillId], references:[id], onDelete: Restrict)
+}
+
+model CreditPurchase {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  creditPackageId String @map("credit_package_id")
+  purchasedCredit Int @map("purchased_credit")
+  pricePaid Int @map("price_paid")
+  purchasedAt DateTime @default(now()) @map("purchased_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("credit_purchases")
+
+  user User @relation(fields:[userId], references:[id], onDelete:Restrict)
+  creditPackage CreditPackage @relation(fields:[creditPackageId], references:[id], onDelete:Restrict)
 }
