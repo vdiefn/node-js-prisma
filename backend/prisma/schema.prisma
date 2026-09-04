@@ -18,6 +18,7 @@ model User {
   @@map("users")
   coach Coach?
   creditPurchase CreditPurchase[]
+  courseBooking CourseBooking[]
 }
 
 model Skill {
@@ -90,6 +91,8 @@ model Course {
 
   coach Coach @relation(fields:[coachId], references: [id], onDelete: Cascade)
   skill Skill @relation(fields:[skillId], references:[id], onDelete: Restrict)
+
+  courseBooking CourseBooking[]
 }
 
 model CreditPurchase {
@@ -106,4 +109,18 @@ model CreditPurchase {
 
   user User @relation(fields:[userId], references:[id], onDelete:Restrict)
   creditPackage CreditPackage @relation(fields:[creditPackageId], references:[id], onDelete:Restrict)
+}
+
+model CourseBooking {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  courseId String @map("course_id")
+  cancelledAt DateTime? @map("cancelled_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("course_bookings")
+
+  user User @relation(fields:[userId], references:[id], onDelete:Restrict)
+  course Course @relation(fields:[courseId], references:[id], onDelete:Restrict)
 }
