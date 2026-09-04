@@ -112,3 +112,37 @@ export const bookingCourse = async (req, res, next) => {
     data: null,
   });
 };
+
+export const cancelBookingCourse = async (req, res, next) => {
+  const { courseId } = req.params;
+  const { id: userId } = req.user;
+
+  if (!validator.isUUID(courseId)) {
+    return next(errorHandler(400, "ID錯誤"));
+  }
+
+  const hasBooking = await prisma.courseBooking.findFirst({
+    where: {
+      userId,
+      courseId,
+      cancelledAt: null,
+    },
+  });
+  if (!hasBooking) {
+    return next(errorHandler(400, "ID錯誤"));
+  }
+
+  await prisma.courseBooking.update({
+    where: {
+      id: hasBooking.id,
+    },
+    data: {
+      cancelledAt: new Date(),
+    },
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: null,
+  });
+};
