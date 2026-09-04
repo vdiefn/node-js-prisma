@@ -194,3 +194,69 @@ export const getPurchaseDetail = async (req, res, next) => {
     data,
   });
 };
+
+export const getUserCourse = async (req, res, next) => {
+  const { id: userId } = req.user;
+
+  const creditPurchaseData = await prisma.creditPurchase.findMany({ where: { userId } });
+  const totalCreditCount = creditPurchaseData.reduce((acc, cur) => (acc = acc + cur.purchasedCredit), 0);
+  const creditUsageCount = await prisma.courseBooking.count({
+    where: {
+      userId,
+      cancelledAt: null,
+    },
+  });
+
+  const courseBookingData = await prisma.courseBooking.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      cancelledAt: true,
+      course: {
+        select: {
+          id: true,
+          name: true,
+          startAt: true,
+          endAt: true,
+          meetingUrl: true,
+          coach: {
+            select: {
+              user: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      course: {
+        startAt: "asc",
+      },
+    },
+  });
+
+  const data = courseBookingData.map((i) => {
+    return {
+      course_id: i.course.id,
+      name: i.course.name,
+      start_at: i.course.startAt,
+      end_at: i.course.endAt,
+      meetingUrl: i.course.meetingUrl,
+      coach_name: i.course.coach.user.name,
+      cancelled_at: i.cancelledAt,
+    };
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      credit_remain: totalCreditCount - creditUsageCount,
+      credit_usage: creditUsageCount,
+      course_booking: data,
+    },
+  });
+};
