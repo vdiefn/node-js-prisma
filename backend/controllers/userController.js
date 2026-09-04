@@ -160,3 +160,37 @@ export const updateUserPassword = async (req, res, next) => {
 
   res.status(200).json({ status: "success", data: null });
 };
+
+export const getPurchaseDetail = async (req, res, next) => {
+  const { id: userId } = req.user;
+
+  const purchaseData = await prisma.creditPurchase.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      purchasedCredit: true,
+      pricePaid: true,
+      purchasedAt: true,
+      creditPackage: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  const data = purchaseData.map((i) => {
+    return {
+      name: i.creditPackage.name,
+      purchased_credits: i.purchasedCredit,
+      price_paid: i.pricePaid,
+      purchase_at: i.purchasedAt,
+    };
+  });
+
+  res.status(200).json({
+    status: "success",
+    data,
+  });
+};
