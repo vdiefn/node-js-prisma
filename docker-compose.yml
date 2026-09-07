@@ -59,7 +59,7 @@ services:
     ports:
       - "8080:8080"
     environment: # 需要哪些變數？可根據 .env.example 對照補齊
-      - PORT=8000
+      - PORT=8080
       - DB_HOST=postgres # 上面那個服務的名字
       - DB_PORT=5432
       - DB_USERNAME=student
