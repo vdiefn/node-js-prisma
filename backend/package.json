@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./bin/www.js",
-    "start": "node ./bin/www.js"
+    "start": "prisma db push && node ./bin/www.js",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
