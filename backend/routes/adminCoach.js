@@ -7,6 +7,7 @@ import {
   createCoachCourse,
   getCourseDetail,
   updateCourseDetail,
+  getCoachRevenue,
 } from "../controllers/adminCoachController.js";
 import { verifyToken } from "../middlewares/verifyToken.js";
 import { isCoach } from "../middlewares/isCoach.js";
@@ -16,6 +17,7 @@ router.post("/courses", verifyToken, isCoach, createCoachCourse);
 router.post("/:userId", createCoach);
 router.get("/courses/:courseId", verifyToken, isCoach, getCourseDetail);
 router.get("/courses", verifyToken, isCoach, getCoachCourse);
+router.get("/revenue", verifyToken, isCoach, getCoachRevenue);
 router.get("/", verifyToken, isCoach, getAdminCoach);
 router.put("/courses/:courseId", verifyToken, isCoach, updateCourseDetail);
 router.put("/", verifyToken, isCoach, updateAdminCoach);

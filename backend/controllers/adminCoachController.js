@@ -283,7 +283,7 @@ export const updateCourseDetail = async (req, res, next) => {
   ) {
     return next(errorHandler(400, "欄位未填寫正確"));
   }
-  
+
   const targetCourse = await prisma.course.findFirst({
     where: {
       id: courseId,
@@ -323,6 +323,93 @@ export const updateCourseDetail = async (req, res, next) => {
         meeting_url: newData.meetingUrl,
         created_at: newData.createdAt,
         updated_at: newData.updatedAt,
+      },
+    },
+  });
+};
+
+function getDateRange(month) {
+  const MONTH_MAP = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+
+  const monthIndex = MONTH_MAP.indexOf(month.toLowerCase());
+  if (monthIndex === -1) {
+    return null;
+  }
+
+  const currentYear = new Date().getFullYear();
+  const startDate = new Date(currentYear, monthIndex, 1);
+  const endDate = new Date(currentYear, monthIndex + 1, 1);
+
+  return { startDate, endDate };
+}
+
+export const getCoachRevenue = async (req, res, next) => {
+  const { month } = req.query;
+  const { id: userId } = req.user;
+
+  const dateRange = getDateRange(month);
+  if (!dateRange) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+
+  const { startDate, endDate } = dateRange;
+  if (!isValidString(month)) {
+    return next(errorHandler(400, "欄位未填寫正確"));
+  }
+
+  const courseBookingData = await prisma.courseBooking.findMany({
+    where: {
+      createdAt: {
+        gte: startDate,
+        lt: endDate,
+      },
+      cancelledAt: null,
+      course: {
+        coach: {
+          userId,
+        },
+      },
+    },
+    select: {
+      userId: true,
+    },
+  });
+  const courseBookingCount = courseBookingData.length;
+  const participants = new Set(courseBookingData.map((i) => i.userId)).size;
+
+  const allCreditPackage = await prisma.creditPackage.findMany();
+  const allPackagePrice = allCreditPackage.reduce((acc, cur) => {
+    acc += cur.price;
+    return acc;
+  }, 0);
+
+  const allCreditCount = allCreditPackage.reduce((acc, cur) => {
+    acc = cur.creditAmount + acc;
+    return acc;
+  }, 0);
+  const averagePackageCost = allCreditCount > 0 ? allPackagePrice / allCreditCount : 0;
+  const revenue = Math.floor(courseBookingCount * averagePackageCost);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      total: {
+        revenue,
+        participants,
+        course_count: courseBookingCount,
       },
     },
   });

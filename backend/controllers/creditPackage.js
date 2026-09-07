@@ -4,7 +4,22 @@ import errorHandler from "../utils/errorHandler.js";
 import { isValidString, isValidInteger } from "../utils/validation.js";
 
 export const getCreditPackage = async (req, res, next) => {
-  const data = await prisma.creditPackage.findMany();
+  const creditPackageData = await prisma.creditPackage.findMany({
+    select: {
+      id: true,
+      name: true,
+      creditAmount: true,
+      price: true,
+    },
+  });
+  const data = creditPackageData.map((i) => {
+    return {
+      id: i.id,
+      name: i.name,
+      credit_amount: i.creditAmount,
+      price: i.price,
+    };
+  });
 
   res.status(200).json({ status: "success", data });
 };
